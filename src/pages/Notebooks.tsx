@@ -1,11 +1,10 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import NotebookCard from "@/components/NotebookCard";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileCode, Search, Heart, MessageSquare, Eye, TrendingUp, Award, Plus } from "lucide-react";
+import { FileCode, Search, TrendingUp, Award, Plus } from "lucide-react";
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 
@@ -170,57 +169,7 @@ const Notebooks = () => {
                 <TabsContent value="popular" className="mt-6">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {filteredNotebooks.map((notebook) => (
-                      <Card key={notebook.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
-                        <CardHeader>
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex gap-2">
-                              <Badge variant="secondary">{notebook.language}</Badge>
-                              {notebook.featured && <Badge variant="default">Featured</Badge>}
-                            </div>
-                          </div>
-                          <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                            {notebook.title}
-                          </CardTitle>
-                          <CardDescription className="line-clamp-2">
-                            {notebook.description}
-                          </CardDescription>
-                        </CardHeader>
-                        
-                        <CardContent className="space-y-4">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">by {notebook.author}</span>
-                            <div className="flex items-center gap-4 text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <Eye className="h-4 w-4" />
-                                {notebook.views}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Heart className="h-4 w-4" />
-                                {notebook.likes}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <MessageSquare className="h-4 w-4" />
-                                {notebook.comments}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-wrap gap-2">
-                            {notebook.tags.map((tag) => (
-                              <Badge key={tag} variant="outline" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        </CardContent>
-
-                        <CardFooter className="flex gap-2">
-                          <Button className="flex-1">View Notebook</Button>
-                          <Button variant="outline">
-                            <Heart className="h-4 w-4" />
-                          </Button>
-                        </CardFooter>
-                      </Card>
+                      <NotebookCard key={notebook.id} notebook={notebook} />
                     ))}
                   </div>
                 </TabsContent>
@@ -228,53 +177,7 @@ const Notebooks = () => {
                 <TabsContent value="featured" className="mt-6">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {filteredNotebooks.filter(n => n.featured).map((notebook) => (
-                      <Card key={notebook.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer group border-primary">
-                        <CardHeader>
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex gap-2">
-                              <Badge variant="secondary">{notebook.language}</Badge>
-                              <Badge variant="default">Featured</Badge>
-                            </div>
-                          </div>
-                          <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                            {notebook.title}
-                          </CardTitle>
-                          <CardDescription className="line-clamp-2">
-                            {notebook.description}
-                          </CardDescription>
-                        </CardHeader>
-                        
-                        <CardContent className="space-y-4">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">by {notebook.author}</span>
-                            <div className="flex items-center gap-4 text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <Eye className="h-4 w-4" />
-                                {notebook.views}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Heart className="h-4 w-4" />
-                                {notebook.likes}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-wrap gap-2">
-                            {notebook.tags.map((tag) => (
-                              <Badge key={tag} variant="outline" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        </CardContent>
-
-                        <CardFooter className="flex gap-2">
-                          <Button className="flex-1">View Notebook</Button>
-                          <Button variant="outline">
-                            <Heart className="h-4 w-4" />
-                          </Button>
-                        </CardFooter>
-                      </Card>
+                      <NotebookCard key={notebook.id} notebook={notebook} showBorder />
                     ))}
                   </div>
                 </TabsContent>
