@@ -57,17 +57,54 @@ const NotebookDetail = () => {
       content: `# Introduction to Machine Learning
 
 ## Course Overview
-This comprehensive tutorial covers fundamental machine learning concepts and practical implementation.
+This comprehensive tutorial covers fundamental machine learning concepts and practical implementation. By the end of this course, you'll be able to build, train, and evaluate machine learning models for real-world applications.
+
+### What You'll Learn:
+- Understanding core ML concepts and algorithms
+- Data preprocessing and feature engineering
+- Model training, validation, and evaluation
+- Implementation of supervised and unsupervised learning
+- Best practices for production ML systems
 
 ## Chapter 1: What is Machine Learning?
-Machine Learning is a subset of AI that enables systems to learn and improve from experience without being explicitly programmed.
+
+Machine Learning is a subset of AI that enables systems to learn and improve from experience without being explicitly programmed. Instead of writing explicit rules, ML algorithms identify patterns in data and make decisions based on those patterns.
 
 ### Types of Machine Learning:
-1. **Supervised Learning** - Learning from labeled data
-2. **Unsupervised Learning** - Finding patterns in unlabeled data
-3. **Reinforcement Learning** - Learning through trial and error
+
+#### 1. Supervised Learning
+Learning from labeled data where we have input-output pairs. The algorithm learns to map inputs to outputs.
+- **Classification**: Predicting categories (spam/not spam, disease/healthy)
+- **Regression**: Predicting continuous values (house prices, temperature)
+- **Common algorithms**: Linear Regression, Decision Trees, Random Forests, SVM, Neural Networks
+
+#### 2. Unsupervised Learning
+Finding patterns in unlabeled data without explicit output labels.
+- **Clustering**: Grouping similar data points (customer segmentation)
+- **Dimensionality Reduction**: Reducing features while preserving information (PCA, t-SNE)
+- **Anomaly Detection**: Identifying unusual patterns (fraud detection)
+
+#### 3. Reinforcement Learning
+Learning through trial and error with rewards and penalties.
+- Agent learns optimal actions in an environment
+- Applications: Game playing, robotics, autonomous vehicles
+- Uses reward signals to guide learning
+
+### Real-World Applications:
+- Healthcare: Disease diagnosis, drug discovery
+- Finance: Credit scoring, fraud detection, algorithmic trading
+- Retail: Recommendation systems, demand forecasting
+- Transportation: Self-driving cars, route optimization
+- Marketing: Customer segmentation, churn prediction
 
 ## Chapter 2: Setting Up Your Environment
+
+### Prerequisites:
+- Basic Python programming knowledge
+- Understanding of basic mathematics (algebra, statistics)
+- Familiarity with data structures
+
+### Installation Steps:
 
 \`\`\`python
 # Install required libraries
@@ -83,56 +120,281 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 \`\`\`
 
-## Chapter 3: Linear Regression Example
+## Chapter 3: Data Preprocessing
+
+Before building models, we need to prepare our data properly.
+
+\`\`\`python
+import pandas as pd
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.impute import SimpleImputer
+
+# Load data
+df = pd.read_csv('dataset.csv')
+
+# Handle missing values
+imputer = SimpleImputer(strategy='mean')
+df_numeric = imputer.fit_transform(df.select_dtypes(include=[np.number]))
+
+# Feature scaling
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(df_numeric)
+
+# Encode categorical variables
+label_encoder = LabelEncoder()
+df['category_encoded'] = label_encoder.fit_transform(df['category'])
+
+# Feature engineering
+df['feature_ratio'] = df['feature1'] / (df['feature2'] + 1)
+df['feature_interaction'] = df['feature1'] * df['feature2']
+\`\`\`
+
+## Chapter 4: Linear Regression - Complete Example
+
+Linear regression finds the best-fitting straight line through data points to predict continuous values.
+
+### Understanding the Mathematics:
+- Formula: y = mx + b (simple) or y = β₀ + β₁x₁ + β₂x₂ + ... (multiple)
+- Goal: Minimize Mean Squared Error (MSE)
+- Assumptions: Linearity, independence, homoscedasticity, normality
 
 \`\`\`python
 # Load sample dataset
-from sklearn.datasets import load_boston
-X, y = load_boston(return_X_y=True)
+from sklearn.datasets import load_diabetes
+from sklearn.model_selection import cross_val_score
+import pandas as pd
 
-# Split data
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Load data
+X, y = load_diabetes(return_X_y=True)
+print(f"Dataset shape: {X.shape}")
+print(f"Number of features: {X.shape[1]}")
+
+# Split data with stratification
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Feature scaling
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
 
 # Train model
 model = LinearRegression()
-model.fit(X_train, y_train)
+model.fit(X_train_scaled, y_train)
 
 # Make predictions
-y_pred = model.predict(X_test)
+y_pred = model.predict(X_test_scaled)
 
-# Evaluate
-print(f"R² Score: {r2_score(y_test, y_pred):.4f}")
-print(f"RMSE: {np.sqrt(mean_squared_error(y_test, y_pred)):.4f}")
+# Detailed evaluation
+r2 = r2_score(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+mae = mean_absolute_error(y_test, y_pred)
+
+print(f"R² Score: {r2:.4f}")
+print(f"RMSE: {rmse:.4f}")
+print(f"MAE: {mae:.4f}")
+
+# Cross-validation
+cv_scores = cross_val_score(model, X_train_scaled, y_train, cv=5, scoring='r2')
+print(f"Cross-validation R² scores: {cv_scores}")
+print(f"Mean CV R²: {cv_scores.mean():.4f} (+/- {cv_scores.std() * 2:.4f})")
+
+# Feature importance
+feature_importance = pd.DataFrame({
+    'feature': range(X.shape[1]),
+    'coefficient': model.coef_
+}).sort_values('coefficient', ascending=False)
+print("\nTop features:")
+print(feature_importance.head())
+
+# Residual analysis
+residuals = y_test - y_pred
+plt.figure(figsize=(12, 4))
+plt.subplot(1, 2, 1)
+plt.scatter(y_pred, residuals)
+plt.axhline(y=0, color='r', linestyle='--')
+plt.xlabel('Predicted Values')
+plt.ylabel('Residuals')
+plt.title('Residual Plot')
+
+plt.subplot(1, 2, 2)
+plt.hist(residuals, bins=30)
+plt.xlabel('Residuals')
+plt.ylabel('Frequency')
+plt.title('Residual Distribution')
+plt.tight_layout()
+plt.show()
 \`\`\`
 
-## Chapter 4: Classification with Decision Trees
+## Chapter 5: Classification with Decision Trees
+
+Decision trees are intuitive models that make decisions based on asking questions about features.
+
+### Advantages:
+- Easy to understand and interpret
+- Requires little data preprocessing
+- Can handle both numerical and categorical data
+- Captures non-linear relationships
 
 \`\`\`python
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.datasets import load_iris
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+import matplotlib.pyplot as plt
 
 # Load iris dataset
 iris = load_iris()
 X_train, X_test, y_train, y_test = train_test_split(
-    iris.data, iris.target, test_size=0.3, random_state=42
+    iris.data, iris.target, test_size=0.3, random_state=42, stratify=iris.target
 )
 
-# Train classifier
-clf = DecisionTreeClassifier(max_depth=3)
+# Train classifier with hyperparameters
+clf = DecisionTreeClassifier(
+    max_depth=4,
+    min_samples_split=5,
+    min_samples_leaf=2,
+    random_state=42
+)
 clf.fit(X_train, y_train)
 
 # Predict and evaluate
 y_pred = clf.predict(X_test)
+y_pred_proba = clf.predict_proba(X_test)
+
 print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
-print(classification_report(y_test, y_pred))
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred, target_names=iris.target_names))
+
+# Confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+print("\nConfusion Matrix:")
+print(cm)
+
+# Visualize tree
+plt.figure(figsize=(20, 10))
+plot_tree(clf, feature_names=iris.feature_names, 
+          class_names=iris.target_names, filled=True, fontsize=10)
+plt.title("Decision Tree Visualization")
+plt.show()
+
+# Feature importance
+importance_df = pd.DataFrame({
+    'feature': iris.feature_names,
+    'importance': clf.feature_importances_
+}).sort_values('importance', ascending=False)
+print("\nFeature Importances:")
+print(importance_df)
+\`\`\`
+
+## Chapter 6: Model Selection and Validation
+
+Learn to choose the right model and validate its performance properly.
+
+\`\`\`python
+from sklearn.model_selection import GridSearchCV, learning_curve
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+
+# Define models to compare
+models = {
+    'Decision Tree': DecisionTreeClassifier(),
+    'Random Forest': RandomForestClassifier(),
+    'SVM': SVC(probability=True)
+}
+
+# Compare models
+results = {}
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    results[name] = accuracy
+    print(f"{name} Accuracy: {accuracy:.4f}")
+
+# Hyperparameter tuning with Grid Search
+param_grid = {
+    'max_depth': [3, 5, 7, 10],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4]
+}
+
+grid_search = GridSearchCV(
+    DecisionTreeClassifier(random_state=42),
+    param_grid,
+    cv=5,
+    scoring='accuracy',
+    n_jobs=-1
+)
+grid_search.fit(X_train, y_train)
+
+print(f"\nBest parameters: {grid_search.best_params_}")
+print(f"Best cross-validation score: {grid_search.best_score_:.4f}")
+
+# Learning curves
+train_sizes, train_scores, val_scores = learning_curve(
+    DecisionTreeClassifier(max_depth=3),
+    X_train, y_train,
+    cv=5,
+    train_sizes=np.linspace(0.1, 1.0, 10),
+    scoring='accuracy'
+)
+
+plt.figure(figsize=(10, 6))
+plt.plot(train_sizes, train_scores.mean(axis=1), label='Training score')
+plt.plot(train_sizes, val_scores.mean(axis=1), label='Validation score')
+plt.xlabel('Training Set Size')
+plt.ylabel('Accuracy')
+plt.title('Learning Curves')
+plt.legend()
+plt.grid(True)
+plt.show()
+\`\`\`
+
+## Chapter 7: Handling Imbalanced Data
+
+Real-world datasets often have imbalanced classes. Learn techniques to handle this.
+
+\`\`\`python
+from sklearn.utils import resample
+from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import RandomUnderSampler
+
+# Create imbalanced dataset
+from sklearn.datasets import make_classification
+X_imb, y_imb = make_classification(
+    n_samples=1000, n_features=20, n_classes=2,
+    weights=[0.9, 0.1], random_state=42
+)
+
+print(f"Original class distribution: {np.bincount(y_imb)}")
+
+# Method 1: Oversampling minority class
+smote = SMOTE(random_state=42)
+X_resampled, y_resampled = smote.fit_resample(X_imb, y_imb)
+print(f"After SMOTE: {np.bincount(y_resampled)}")
+
+# Method 2: Class weights
+model_weighted = RandomForestClassifier(class_weight='balanced', random_state=42)
+model_weighted.fit(X_imb, y_imb)
+
+# Method 3: Ensemble methods
+from sklearn.ensemble import BalancedRandomForestClassifier
+balanced_rf = BalancedRandomForestClassifier(random_state=42)
+balanced_rf.fit(X_imb, y_imb)
 \`\`\`
 
 ## Key Takeaways
-- ML enables computers to learn from data
-- Start with simple algorithms like Linear Regression
-- Always split your data into training and testing sets
-- Evaluate models using appropriate metrics
+- ML enables computers to learn from data without explicit programming
+- Data preprocessing is crucial for model performance
+- Start with simple algorithms and increase complexity as needed
+- Always split your data into training, validation, and test sets
+- Use cross-validation for robust model evaluation
+- Feature engineering can significantly improve results
+- Handle imbalanced data with appropriate techniques
+- Evaluate models using metrics appropriate for your problem
+- Visualize results to gain insights
+- Continuously monitor and update models in production
 `,
     },
     "2": {
@@ -1544,10 +1806,11 @@ class PolicyGradientAgent:
                     placeholder="Share your thoughts about this notebook..."
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
-                    className="min-h-[100px]"
+                    className="min-h-[150px] text-base"
+                    autoFocus
                   />
                   <div className="flex justify-end">
-                    <Button onClick={handlePostComment}>
+                    <Button onClick={handlePostComment} size="lg">
                       <Send className="h-4 w-4 mr-2" />
                       Post Comment
                     </Button>
