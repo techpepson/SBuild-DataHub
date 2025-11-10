@@ -13,7 +13,8 @@ const Signup = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: ""
+    role: "",
+    customRole: ""
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -76,10 +77,23 @@ const Signup = () => {
                     <SelectItem value="developer">Data Enthusiast/Developer</SelectItem>
                     <SelectItem value="institutional">Institutional Data Provider</SelectItem>
                     <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="other">Other (please specify)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+              {formData.role === "other" && (
+                <div className="space-y-2">
+                  <Label htmlFor="customRole">Please specify your role</Label>
+                  <Input
+                    id="customRole"
+                    type="text"
+                    placeholder="e.g., Government Official, NGO Worker"
+                    value={formData.customRole}
+                    onChange={(e) => setFormData({ ...formData, customRole: e.target.value })}
+                    required
+                  />
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <Input
