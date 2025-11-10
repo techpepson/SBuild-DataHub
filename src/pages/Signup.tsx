@@ -90,7 +90,7 @@ const Signup = () => {
                     placeholder="e.g., Government Official, NGO Worker"
                     value={formData.customRole}
                     onChange={(e) => setFormData({ ...formData, customRole: e.target.value })}
-                    required
+                    autoFocus
                   />
                 </div>
               )}
